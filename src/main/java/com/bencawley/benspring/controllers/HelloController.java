@@ -1,6 +1,8 @@
 package com.bencawley.benspring.controllers;
 
-// Import Spring annotations for REST controllers and mapping HTTP GET requests
+import com.bencawley.benspring.dtos.HelloDTO;
+import com.bencawley.benspring.dtos.HelloResponseDTO;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,5 +16,17 @@ public class HelloController {
         // When someone visits "/", this method returns a simple String response
         // Spring Boot sends this String as the HTTP response body directly
         return "Hello from Spring Boot!";
+    }
+
+    // Handles POST requests to "/request/data"
+    @PostMapping("/request/data")
+    public HelloResponseDTO handleData(@RequestBody HelloDTO request) {
+        String input = request.getInput();
+        if (input == null) {
+            // Return some default or error message instead of reversing null
+            return new HelloResponseDTO("Input was null");
+        }
+        String reversed = new StringBuilder(input).reverse().toString();
+        return new HelloResponseDTO(reversed);
     }
 }
