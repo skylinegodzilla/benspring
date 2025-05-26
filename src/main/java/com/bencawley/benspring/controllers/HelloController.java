@@ -18,7 +18,7 @@ public class HelloController {
     }
 
     // Maps HTTP POST requests sent to "/request/data" to this method
-    @PostMapping("/request/data")
+    @PostMapping("/api/data")
     public HelloResponseDTO handleData(
             // Instructs Spring to parse JSON request body into a HelloDTO object
             @RequestBody HelloDTO request) {

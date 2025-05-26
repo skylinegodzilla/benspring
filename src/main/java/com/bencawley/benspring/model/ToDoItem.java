@@ -5,6 +5,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
+import java.time.LocalDate;
+
 @Entity
 public class ToDoItem {
 
@@ -16,12 +18,19 @@ public class ToDoItem {
 
     private boolean completed;
 
+    private LocalDate dueDate;
+
     // Constructors
     public ToDoItem() {}
 
-    public ToDoItem(String title, boolean completed) {
+    public ToDoItem(String title, boolean completed, LocalDate dueDate) {
         this.title = title;
         this.completed = completed;
+        this.dueDate = dueDate;
+    }
+
+    public ToDoItem(String title, boolean completed) {
+        this(title, completed, null);
     }
 
     // Getters and Setters
@@ -47,5 +56,13 @@ public class ToDoItem {
 
     public void setCompleted(boolean completed) {
         this.completed = completed;
+    }
+
+    public LocalDate getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(LocalDate dueDate) {
+        this.dueDate = dueDate;
     }
 }
