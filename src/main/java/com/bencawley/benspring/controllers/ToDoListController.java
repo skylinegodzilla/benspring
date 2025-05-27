@@ -15,7 +15,7 @@ public class ToDoListController {
 
     private final ToDoListRepository listRepo;
 
-    public ToDoListController(ToDoListRepository listRepo, ToDoListMapper toDoListMapper) {
+    public ToDoListController(ToDoListRepository listRepo) {
         this.listRepo = listRepo;
     }
 

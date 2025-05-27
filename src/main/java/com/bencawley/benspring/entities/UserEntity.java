@@ -17,23 +17,36 @@ JPA handles:
 @Entity // marks a class as a JPA entity — meaning it's a class that maps to a table in your database. in this case the class is User
 public class UserEntity {
 
+    // ID
     @Id // this makes this class member the primary key of the entity. Each user will have its own uniqe id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // tells JPA to auto-generate the ID using the database's identity column (auto-incrementing integer in PostgreSQL).
     private Long id;
 
+    // Username
     //The members in the class become the columns in the table.
     @Column(unique = true, nullable = false) // unique means each username has to be unique, nullable = false means this has to have a value it cant be null
     private String username;
 
+    // Email
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    // Password
     //The members in the class become the columns in the table.
     @JsonIgnore //  is a Jackson annotation (not JPA) that prevents this field from being included in API responses
     @Column(nullable = false)
     private String passwordHash;
 
+    // Session token
+    @Column(name = "session_token")
+    private String sessionToken;
+
+    // List of todos
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference //  marks the forward part of the reference (parent → child) to prevent the list becoming recurse infinitely when serializing.
     private List<ToDoListEntity> todoLists = new ArrayList<>();
 
+    // Constructors
     public UserEntity() {}
 
     public UserEntity(String username, String passwordHash) {
@@ -43,6 +56,7 @@ public class UserEntity {
 
     // Getters and setters
 
+    // ID
     public Long getId() {
         return id;
     }
@@ -51,6 +65,7 @@ public class UserEntity {
         this.id = id;
     }
 
+    //Username
     public String getUsername() {
         return username;
     }
@@ -59,6 +74,7 @@ public class UserEntity {
         this.username = username;
     }
 
+    // Password
     public String getPasswordHash() {
         return passwordHash;
     }
@@ -67,11 +83,29 @@ public class UserEntity {
         this.passwordHash = passwordHash;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    // List linking
     public List<ToDoListEntity> getTodoLists() {
         return todoLists;
     }
 
     public void setTodoLists(List<ToDoListEntity> todoLists) {
         this.todoLists = todoLists;
+    }
+
+    // Session token
+    public String getSessionToken() {
+        return sessionToken;
+    }
+
+    public void setSessionToken(String sessionToken) {
+        this.sessionToken = sessionToken;
     }
 }
