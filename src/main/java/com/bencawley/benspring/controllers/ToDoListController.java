@@ -41,7 +41,7 @@ public class ToDoListController {
     // endpoint to fetch lists by userId
     @GetMapping("/user/{userId}")
     public List<ToDoListDTO> getListsByUserId(@PathVariable Long userId) {
-        List<ToDoListEntity> lists = listRepo.findByOwnerId(userId);
+        List<ToDoListEntity> lists = listRepo.findByUserId(userId);
         return lists.stream()
                 .map(ToDoListMapper::toDto)
                 .collect(Collectors.toList());

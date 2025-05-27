@@ -39,8 +39,36 @@ public class SessionTokenFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
-        // Exclude /api/auth from filtering
-        // lol imagion trying to get to the login page and then it requires a token to access. It's Like the experience to get a job issue.
-        return path.startsWith("/api/auth");
+
+        // 1) Allow unauthenticated access to your login/register endpoints
+        if (path.startsWith("/api/auth")) {
+            return true;
+        }
+
+        // 2) Allow the root landing page
+        if ("/".equals(path)) {
+            return true;
+        }
+
+        // 3) Allow Spring Boot’s error page
+        if (path.startsWith("/error")) {
+            return true;
+        }
+
+        // 4) Allow any static resources (css, js, images, etc.)
+        if (path.startsWith("/css")
+                || path.startsWith("/js")
+                || path.startsWith("/images")
+                || path.startsWith("/webjars")) {
+            return true;
+        }
+
+        // 5) (Optional) If you expose actuator or swagger, allow those too:
+        // if (path.startsWith("/actuator") || path.startsWith("/v3/api-docs") || path.startsWith("/swagger-ui")) {
+        //     return true;
+        // }
+
+        // everything else *will* be filtered
+        return false;
     }
 }
