@@ -1,8 +1,9 @@
 package com.bencawley.benspring.controllers;
 
-import com.bencawley.benspring.model.ToDoItem;
-import com.bencawley.benspring.repository.ToDoItemRepository;
-import org.springframework.http.ResponseEntity;
+import com.bencawley.benspring.dtos.ToDoItemDTO;
+import com.bencawley.benspring.entities.ToDoItemEntity;
+import com.bencawley.benspring.repositories.ToDoItemRepository;
+import com.bencawley.benspring.mappers.ToDoItemMapper;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,21 +18,17 @@ public class ToDoItemController {
     }
 
     @GetMapping("/api/todos")
-    public List<ToDoItem> getAllToDoItems() {
-        return toDoItemRepository.findAll();
+    public List<ToDoItemDTO> getAllToDoItems() {
+        return toDoItemRepository.findAll()
+                .stream()
+                .map(ToDoItemMapper::toDTO)
+                .toList();
     }
 
     @PostMapping("/api/todos")
-    public ToDoItem createToDoItem(@RequestBody ToDoItem newItem) {
-        return toDoItemRepository.save(newItem);
-    }
-
-    @DeleteMapping("/api/todos/{id}")
-    public ResponseEntity<Void> deleteToDoItem(@PathVariable Long id) {
-        if (!toDoItemRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-        toDoItemRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
+    public ToDoItemDTO createToDoItem(@RequestBody ToDoItemDTO dto) {
+        ToDoItemEntity entity = ToDoItemMapper.toEntity(dto);
+        ToDoItemEntity saved = toDoItemRepository.save(entity);
+        return ToDoItemMapper.toDTO(saved);
     }
 }
