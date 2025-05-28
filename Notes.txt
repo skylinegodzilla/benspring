@@ -1,0 +1,2 @@
+1) The server app wont boot if there's no database to connect to!
+2) 

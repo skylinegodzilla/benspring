@@ -1,7 +1,9 @@
 package com.bencawley.benspring.entities;
 
+import com.bencawley.benspring.utilities.UserRole;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -14,6 +16,7 @@ JPA handles:
 -Relationships: @OneToMany, @ManyToOne, etc.
 - Database operations: via JpaRepository, so you can save(), findAll(), etc.
  */
+
 @Entity // marks a class as a JPA entity — meaning it's a class that maps to a table in your database. in this case the class is User
 public class UserEntity {
 
@@ -40,6 +43,11 @@ public class UserEntity {
     // Session token
     @Column(name = "session_token")
     private String sessionToken;
+
+    // User Role flag
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserRole role = UserRole.USER;
 
     // List of todos
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
@@ -83,12 +91,22 @@ public class UserEntity {
         this.passwordHash = passwordHash;
     }
 
+    // Email
     public String getEmail() {
         return email;
     }
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    // User Role
+    public UserRole getRole() {
+        return role;
+    }
+
+    public void setRole(UserRole role) {
+        this.role = role;
     }
 
     // List linking

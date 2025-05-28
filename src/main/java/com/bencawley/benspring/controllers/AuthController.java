@@ -3,6 +3,7 @@ package com.bencawley.benspring.controllers;
 import com.bencawley.benspring.dtos.UserDTO;
 import com.bencawley.benspring.dtos.UserLoginDTO;
 import com.bencawley.benspring.dtos.UserRegistrationDTO;
+import com.bencawley.benspring.dtos.UserRegistrationResponseDTO;
 import com.bencawley.benspring.entities.UserEntity;
 import com.bencawley.benspring.services.SessionService;
 import com.bencawley.benspring.services.UserService;
@@ -29,9 +30,14 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody UserRegistrationDTO dto) {
+    public ResponseEntity<UserRegistrationResponseDTO> register(@RequestBody UserRegistrationDTO dto) { // todo might pay to rember this will accept any correctlery formated response so you might want to have an valid email check.. also might also want to add in a check for password and conform password and that they match
         UserEntity user = userService.register(dto);
-        return ResponseEntity.ok(user.getSessionToken());
+        UserRegistrationResponseDTO response = new UserRegistrationResponseDTO(
+                user.getSessionToken(),
+                HttpStatus.OK.value(),
+                "Registration successful"
+        );
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/login")
@@ -49,5 +55,23 @@ public class AuthController {
         response.put("userId", user.getId());
 
         return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/remove/{username}")
+    public ResponseEntity<?> deleteUser(
+            @PathVariable String username,
+            @RequestHeader("Authorization") String sessionToken) {
+        try {
+            userService.deleteUserByUsernameIfAdmin(username, sessionToken);
+            return ResponseEntity.ok(Map.of(
+                    "status", 200,
+                    "message", "User deleted successfully"
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
+                    "status", 403,
+                    "message", e.getMessage()
+            ));
+        }
     }
 }

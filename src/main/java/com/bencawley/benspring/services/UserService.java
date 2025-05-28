@@ -5,6 +5,7 @@ import com.bencawley.benspring.dtos.UserLoginDTO;
 import com.bencawley.benspring.dtos.UserRegistrationDTO;
 import com.bencawley.benspring.entities.UserEntity;
 import com.bencawley.benspring.repositories.UserRepository;
+import com.bencawley.benspring.utilities.UserRole;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
@@ -48,6 +49,25 @@ public class UserService {
         }
 
         return null;
+    }
+
+    // delete user by username, only if caller is admin
+    public void deleteUserByUsernameIfAdmin(String usernameToDelete, String callerSessionToken) {
+        UserEntity caller = userRepo.findBySessionToken(callerSessionToken);
+        if (caller == null) {
+            throw new RuntimeException("Invalid session token");
+        }
+
+        if (caller.getRole() != UserRole.ADMIN) {
+            throw new RuntimeException("Only admins can delete users");
+        }
+
+        UserEntity targetUser = userRepo.findByUsername(usernameToDelete);
+        if (targetUser == null) {
+            throw new RuntimeException("User to delete not found");
+        }
+
+        userRepo.delete(targetUser);
     }
 
     public UserEntity findBySessionToken(String token) {
