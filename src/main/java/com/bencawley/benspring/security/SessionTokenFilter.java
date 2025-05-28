@@ -63,10 +63,13 @@ public class SessionTokenFilter extends OncePerRequestFilter {
             return true;
         }
 
-        // 5) (Optional) If you expose actuator or swagger, allow those too:
-        // if (path.startsWith("/actuator") || path.startsWith("/v3/api-docs") || path.startsWith("/swagger-ui")) {
-        //     return true;
-        // }
+        // 5) Swagger
+        if (path.startsWith("/v3/api-docs")
+                || path.startsWith("/swagger-ui")
+                || path.startsWith("/swagger-resources/**")
+                || path.startsWith("/webjars/**")) {
+             return true;
+        }
 
         // everything else *will* be filtered
         return false;

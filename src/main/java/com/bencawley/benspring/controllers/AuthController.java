@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +31,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserRegistrationResponseDTO> register(@RequestBody UserRegistrationDTO dto) { // todo might pay to rember this will accept any correctlery formated response so you might want to have an valid email check.. also might also want to add in a check for password and conform password and that they match
+    public ResponseEntity<UserRegistrationResponseDTO> register(@RequestBody UserRegistrationDTO dto) { // todo this will accept any correct formated response so you might want to have an valid email check... also might also want to add in a check for password and conform password and that they match
         UserEntity user = userService.register(dto);
         UserRegistrationResponseDTO response = new UserRegistrationResponseDTO(
                 user.getSessionToken(),
@@ -42,19 +43,22 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserLoginDTO dto) {
-        UserEntity user = userService.findByUsername(dto.getUsername());
+        try {
+            UserEntity user = userService.login(dto); // Delegated to service
 
-        if (user == null || !passwordEncoder.matches(dto.getPassword(), user.getPasswordHash())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+            }
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("token", user.getSessionToken());
+            response.put("userId", user.getId());
+
+            return ResponseEntity.ok(response);
+
+        } catch (ResponseStatusException ex) {
+            return ResponseEntity.status(ex.getStatusCode()).body(ex.getReason());
         }
-
-        String token = sessionService.createSession(user.getId());
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("token", token);
-        response.put("userId", user.getId());
-
-        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/remove/{username}")
