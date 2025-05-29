@@ -2,7 +2,7 @@
 
 > **Local-only Shared Family To-Do List App**  
 > A lightweight Spring Boot + PostgreSQL backend, with native iOS & Android clients, push notifications, and presence detection. a full stack project for personal study purposes.
-
+> The project act as a persional notifcation system that triggers based on proximatey so push notafcations are delivered to users when they get home (conect to the local network) to remind them of their tasks.
 ---
 
 ## 📦 Tech Stack
@@ -145,7 +145,6 @@
 ### 📱 Mobile Clients (Upcoming)
 - [ ] iOS (SwiftUI)
 - [ ] Android (Jetpack Compose)
-- [ ] Token management & sync
 
 ### 📡 Presence & Notifications
 - [ ] ARP/Nmap home detection
@@ -165,6 +164,22 @@
 ---
 
 ## 🚀 Running Locally
+This is a very quick explanation I plan to write this in more detail when I can. 
+But its simpley: 
+
+* Deploy a postgres database using docker,
+
+* Configure in application.properties to point to the database,
+
+* Build the artifact using maven clean build command,
+
+* Build a docker image with the artifact (using an ubuntu jdk 17 docker image)
+
+* Deploy that docker image.
+
+you can access the API at http://localhost:8080/api
+
+and the swagger docks at http://localhost:8080/swagger-ui/index.html
 
 1. **Copy & configure**
    ```bash
