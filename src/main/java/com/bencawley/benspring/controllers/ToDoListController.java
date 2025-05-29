@@ -57,6 +57,7 @@ public class ToDoListController {
 
         // map entity and assign the user
         ToDoListEntity entity = ToDoListMapper.toEntity(dto);
+        entity.setUser(user);
 
         // save to db
         ToDoListEntity saved = listRepo.save(entity);
