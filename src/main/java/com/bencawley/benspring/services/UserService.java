@@ -104,6 +104,4 @@ public class UserService {
     private String generateSessionToken() {
         return new BigInteger(130, random).toString(32);
     }
-
-
 }
