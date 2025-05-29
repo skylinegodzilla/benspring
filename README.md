@@ -2,7 +2,7 @@
 
 > **Local-only Shared Family To-Do List App**  
 > A lightweight Spring Boot + PostgreSQL backend, with native iOS & Android clients, push notifications, and presence detection. a full stack project for personal study purposes.
-
+> The project act as a persional notifcation system that triggers based on proximatey so push notafcations are delivered to users when they get home (conect to the local network) to remind them of their tasks.
 ---
 
 ## 📦 Tech Stack
