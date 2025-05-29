@@ -1,4 +1,22 @@
 package com.bencawley.benspring.controllers;
+/*
+    Hello
+    This is a sandbox project to build a simple back end.
+
+    some things to keep in mind
+
+    DTO is like our response objects in swift. except the dto will be turned in to a JSON not created from a JSON but yeah its the data prepared to be sent over the REST api
+
+    An entity is the data that stores the information that is pulled from the database
+
+    A controller handles the api endpoint and prepears the dto's to be sent using the mapper.
+
+    A mapper maps dtos to entitys.
+
+
+ */
+
+
 
 // Import DTO classes for request and response data structures
 import com.bencawley.benspring.dtos.HelloDTO;
@@ -18,7 +36,7 @@ public class HelloController {
     }
 
     // Maps HTTP POST requests sent to "/request/data" to this method
-    @PostMapping("/request/data")
+    @PostMapping("/api/data")
     public HelloResponseDTO handleData(
             // Instructs Spring to parse JSON request body into a HelloDTO object
             @RequestBody HelloDTO request) {
