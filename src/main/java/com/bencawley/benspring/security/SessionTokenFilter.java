@@ -26,7 +26,9 @@ public class SessionTokenFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        String token = request.getHeader("X-Session-Token");
+        String token = request.getHeader("Authorization");
+        System.out.println("Token:" + token); //todo remove this line
+        System.out.println("sessionService.validateSession(token):" + sessionService.validateSession(token)); //todo remove this line
         if (token == null || sessionService.validateSession(token) == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("Invalid or missing session token");

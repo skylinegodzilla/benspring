@@ -1,4 +1,4 @@
-package com.bencawley.benspring;
+package com.bencawley.benspring.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

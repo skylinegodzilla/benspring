@@ -32,6 +32,10 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<UserRegistrationResponseDTO> register(@RequestBody UserRegistrationDTO dto) { // todo this will accept any correct formated response so you might want to have an valid email check... also might also want to add in a check for password and conform password and that they match
         UserEntity user = userService.register(dto);
+
+        // Don't forget to create the session LOL
+        sessionService.createSession(user.getId(), user.getSessionToken());
+
         UserRegistrationResponseDTO response = new UserRegistrationResponseDTO(
                 user.getSessionToken(),
                 HttpStatus.OK.value(),
@@ -54,6 +58,8 @@ public class AuthController {
                         )
                 );
             }
+            // Don't forget to create the session LOL
+            sessionService.createSession(user.getId(), user.getSessionToken());
 
             UserLoginResponseDTO response = new UserLoginResponseDTO(
                     user.getSessionToken(),

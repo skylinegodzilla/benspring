@@ -38,7 +38,7 @@ public class ToDoListController {
         listRepo.deleteById(id);
     }
 
-    // endpoint to fetch lists by userId
+    // endpoint to fetch lists by userId // todo this is wrong because its nested inside the /api/todolists endpoint :P it should just be rethought about
     @GetMapping("/user/{userId}")
     public List<ToDoListDTO> getListsByUserId(@PathVariable Long userId) {
         List<ToDoListEntity> lists = listRepo.findByUserId(userId);
