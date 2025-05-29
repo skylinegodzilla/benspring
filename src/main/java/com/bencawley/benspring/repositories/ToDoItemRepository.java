@@ -7,5 +7,5 @@ import java.util.List;
 
 @Repository
 public interface ToDoItemRepository extends JpaRepository<ToDoItemEntity, Long> {
-    List<ToDoItemEntity> findByToDoListId(Long listId);
+    List<ToDoItemEntity> findByList_Id(Long listId);
 }

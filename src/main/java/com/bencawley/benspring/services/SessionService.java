@@ -1,6 +1,7 @@
 package com.bencawley.benspring.services;
 
 
+import com.bencawley.benspring.entities.UserEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -31,4 +32,7 @@ public class SessionService {
     public void invalidateSession(String token) {
         sessions.remove(token);
     }
+
+    // todo add this
+    //UserEntity getUserBySession(String token); // Optional, helpful for cleaner controller code
 }

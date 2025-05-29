@@ -6,67 +6,38 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
+@Table(name = "todo_items")
 public class ToDoItemEntity {
 
-    @Id // table id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // genarte the id
-    private Long id; // the id
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String title;
-    private boolean completed;
+
+    private Boolean completed = false;
+
+    @Column(name = "due_date")
     private LocalDate dueDate;
 
-    @ManyToOne
-    @JoinColumn(name = "list_id", nullable = false) // to link the item to the list that it is apart of
-    @JsonBackReference //  marks the back part of the reference (child → parent) to prevent the list becoming recurse infinitely when serializing.
-    private ToDoListEntity toDoList; // this holds the id of the list this todo item is apart of
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "list_id")
+    @JsonBackReference
+    private ToDoListEntity list;
 
-    // Constructors
-    public ToDoItemEntity() {}
+    // Getters and setters
+    public Long getId() {return id;}
+    public void setId(Long id) {this.id = id;}
 
-    public ToDoItemEntity(
-            String title,
-            boolean completed,
-            LocalDate dueDate
-    ) {
-        this.title = title;
-        this.completed = completed;
-        this.dueDate = dueDate;
-    }
+    public String getTitle() {return title;}
+    public void setTitle(String title) {this.title = title;}
 
-    public ToDoItemEntity(String title, boolean completed) {
-        this(title, completed, null);
-    }
+    public Boolean isCompleted() {return completed;}
+    public void setCompleted(Boolean completed) {this.completed = completed;}
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public String getTitle() {
-        return title;
-    }
-    public void setTitle(String title) {
-        this.title = title;
-    }
-    public boolean isCompleted() {
-        return completed;
-    }
-    public void setCompleted(boolean completed) {
-        this.completed = completed;
-    }
-    public LocalDate getDueDate() {
-        return dueDate;
-    }
-    public void setDueDate(LocalDate dueDate) {
-        this.dueDate = dueDate;
-    }
-    public ToDoListEntity getToDoList() {
-        return toDoList;
-    }
+    public LocalDate getDueDate() {return dueDate;}
+    public void setDueDate(LocalDate dueDate) {this.dueDate = dueDate;}
 
-    public void setToDoList(ToDoListEntity toDoList) {
-        this.toDoList = toDoList;
-    }
+    public ToDoListEntity getList() {return list;}
+    public void setList(ToDoListEntity list) {this.list = list;}
 }
