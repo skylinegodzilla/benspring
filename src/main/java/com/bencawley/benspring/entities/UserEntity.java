@@ -63,12 +63,10 @@ public class UserEntity {
     }
 
     // Getters and setters
-
     // ID
     public Long getId() {
         return id;
     }
-
     public void setId(Long id) {
         this.id = id;
     }
@@ -77,7 +75,6 @@ public class UserEntity {
     public String getUsername() {
         return username;
     }
-
     public void setUsername(String username) {
         this.username = username;
     }
@@ -86,7 +83,6 @@ public class UserEntity {
     public String getPasswordHash() {
         return passwordHash;
     }
-
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
     }
@@ -95,35 +91,23 @@ public class UserEntity {
     public String getEmail() {
         return email;
     }
-
     public void setEmail(String email) {
         this.email = email;
     }
 
     // User Role
-    public UserRole getRole() {
-        return role;
-    }
-
-    public void setRole(UserRole role) {
-        this.role = role;
-    }
+    public UserRole getRole() {return role;}
+    public void setRole(UserRole role) {this.role = role;}
 
     // List linking
     public List<ToDoListEntity> getTodoLists() {
         return todoLists;
     }
-
     public void setTodoLists(List<ToDoListEntity> todoLists) {
         this.todoLists = todoLists;
     }
 
     // Session token
-    public String getSessionToken() {
-        return sessionToken;
-    }
-
-    public void setSessionToken(String sessionToken) {
-        this.sessionToken = sessionToken;
-    }
+    public String getSessionToken() {return sessionToken;}
+    public void setSessionToken(String sessionToken) {this.sessionToken = sessionToken;}
 }

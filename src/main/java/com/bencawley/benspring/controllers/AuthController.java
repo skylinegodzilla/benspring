@@ -17,7 +17,6 @@ import java.util.Map;
 public class AuthController {
 
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
     private final SessionService sessionService;
 
     public AuthController(UserService userService,
@@ -25,7 +24,6 @@ public class AuthController {
                           SessionService sessionService
     ) {
         this.userService = userService;
-        this.passwordEncoder = passwordEncoder;  // Initialize here
         this.sessionService = sessionService;
     }
 
@@ -82,8 +80,39 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<LogOutResponseDTO> logout(@RequestHeader("Authorization") String token) {
+        if (token == null || token.isEmpty()) {
+            LogOutResponseDTO response = new LogOutResponseDTO();
+            response.setSuccess(false);
+            response.setMessage("Missing session token.");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        Long userId = sessionService.validateSession(token);
+        if (userId == null) {
+            LogOutResponseDTO response = new LogOutResponseDTO();
+            response.setSuccess(false);
+            response.setMessage("Invalid session token.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+
+        UserEntity user = userService.getUserById(userId);
+        if (user != null) {
+            user.setSessionToken(null);
+            userService.save(user);
+        }
+
+        sessionService.invalidateSession(token);
+
+        LogOutResponseDTO response = new LogOutResponseDTO();
+        response.setSuccess(true);
+        response.setMessage("Logged out successfully.");
+        return ResponseEntity.ok(response);
+    }
+
     @DeleteMapping("/remove/{username}")
-    public ResponseEntity<?> deleteUser(
+    public ResponseEntity<?> deleteUser( // todo fix this response entity to return an real object
             @PathVariable String username,
             @RequestHeader("Authorization") String sessionToken) {
         try {

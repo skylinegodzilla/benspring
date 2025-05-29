@@ -24,7 +24,7 @@ public class UserService {
     // Other Members
     private final SecureRandom random = new SecureRandom();
 
-    // UserService
+    // UserService constructor
     public UserService(UserRepository userRepo, PasswordEncoder passwordEncoder) {
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
@@ -91,6 +91,14 @@ public class UserService {
 
     public UserEntity findByUsername(String username) {
         return userRepo.findByUsername(username);
+    }
+
+    public UserEntity getUserById(Long id) {
+        return userRepo.findById(id).orElse(null);
+    }
+
+    public UserEntity save(UserEntity user) {
+        return userRepo.save(user);
     }
 
     private String generateSessionToken() {
