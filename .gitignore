@@ -35,3 +35,5 @@ build/
 ### secrits ###
 *.env
 docker-compose-postgres.yml
+my-spring-app_0.0.3.tar
+my-spring-app_0.0.4.tar

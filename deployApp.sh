@@ -3,7 +3,7 @@ set -euo pipefail
 
 # ---------- Config ----------
 IMAGE_NAME="my-spring-app"
-IMAGE_TAG="0.0.3" # remember to update the tag
+IMAGE_TAG="0.0.4" # remember to update the tag
 TAR_FILE="${IMAGE_NAME//[:\/]/_}_${IMAGE_TAG}.tar"
 REMOTE_USER="skylinegodzilla"
 REMOTE_HOST="192.168.1.236"
