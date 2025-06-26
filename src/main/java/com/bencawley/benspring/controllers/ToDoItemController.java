@@ -26,7 +26,7 @@ public class ToDoItemController {
         this.toDoListRepository = toDoListRepository;
     }
 
-    // GET all to-do items
+    // GET all to-do items // todo might need to remove this endpoint call
     @GetMapping
     public ResponseEntity<List<ToDoItemResponseDTO>> getAllToDoItems() {
         List<ToDoItemResponseDTO> items = toDoItemRepository.findAll()
@@ -36,7 +36,7 @@ public class ToDoItemController {
         return ResponseEntity.ok(items);
     }
 
-    // POST a new to-do item
+    // POST a new to-do item // todo might need to change this to  @PostMapping("/{id}")
     @PostMapping // todo replace this object with a dto
     public ResponseEntity<Object> createToDoItem(@RequestBody ToDoItemResponseDTO dto) {
         Optional<ToDoListEntity> optionalList = toDoListRepository.findById(dto.getItemId());
@@ -54,6 +54,7 @@ public class ToDoItemController {
     // GET a single to-do item by ID
     @GetMapping("/{id}")
     public ResponseEntity<Object> getToDoItemById(@PathVariable Long id) {
+        //todo: Might have to check that the sessiontoken used in this matches the id if not then deny them access but test first making this change
         Optional<ToDoItemEntity> optionalItem = toDoItemRepository.findById(id);
         if (optionalItem.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
