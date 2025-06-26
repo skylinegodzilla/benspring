@@ -4,14 +4,12 @@ package com.bencawley.benspring.dtos;
 
 public class UserLoginResponseDTO {
     private String token;
-    private Long userId;
     private int status;
     private String message;
 
     // Constructor
     public UserLoginResponseDTO(String token, Long userId, int status, String message) {
         this.token = token;
-        this.userId = userId;
         this.status = status;
         this.message = message;
     }
@@ -20,9 +18,6 @@ public class UserLoginResponseDTO {
 
     public String getToken() { return token; }
     public void setToken(String token) { this.token = token; }
-
-    public long getUserId() { return userId; }
-    public void setUserId(int status) { this.userId = userId; }
 
     public int getStatus() { return status; }
     public void setStatus(int status) { this.status = status; }
