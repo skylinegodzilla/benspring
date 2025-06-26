@@ -27,8 +27,16 @@ public class AuthController {
         this.sessionService = sessionService;
     }
 
+    /**
+     * Registers a new user and creates a session token.
+     *
+     * @param dto User registration details (email, password, etc.)
+     * @return Response with session token and success message
+     */
     @PostMapping("/register")
-    public ResponseEntity<UserRegistrationResponseDTO> register(@RequestBody UserRegistrationDTO dto) { // todo this will accept any correct formated response so you might want to have an valid email check... also might also want to add in a check for password and conform password and that they match
+    public ResponseEntity<UserRegistrationResponseDTO> register(@RequestBody UserRegistrationDTO dto) {
+        // todo this will accept any correct formatted response so you might want to have a valid email check...
+        // also might want to add a check for password and confirm password match
         UserEntity user = userService.register(dto);
 
         // Don't forget to create the session LOL
@@ -42,6 +50,12 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Logs in a user with provided credentials and returns a session token.
+     *
+     * @param dto User login credentials
+     * @return Session token and user ID, or unauthorized status
+     */
     @PostMapping("/login")
     public ResponseEntity<UserLoginResponseDTO> login(@RequestBody UserLoginDTO dto) {
         try {
@@ -56,7 +70,7 @@ public class AuthController {
                         )
                 );
             }
-            // Don't forget to create the session LOL
+
             sessionService.createSession(user.getId(), user.getSessionToken());
 
             UserLoginResponseDTO response = new UserLoginResponseDTO(
@@ -80,6 +94,12 @@ public class AuthController {
         }
     }
 
+    /**
+     * Logs out the user by invalidating their session token.
+     *
+     * @param token Session token from Authorization header
+     * @return Logout success or error response
+     */
     @PostMapping("/logout")
     public ResponseEntity<LogOutResponseDTO> logout(@RequestHeader("Authorization") String token) {
         if (token == null || token.isEmpty()) {
@@ -111,10 +131,17 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Deletes a user account by username, only if the requester is an admin.
+     *
+     * @param username Username of the user to delete
+     * @param sessionToken Admin's session token from Authorization header
+     * @return Success or failure message
+     */
     @DeleteMapping("/remove/{username}")
-    public ResponseEntity<?> deleteUser( // todo fix this response entity to return an real object
-            @PathVariable String username,
-            @RequestHeader("Authorization") String sessionToken) {
+    public ResponseEntity<?> deleteUser( // todo fix this response entity to return a real object
+                                         @PathVariable String username,
+                                         @RequestHeader("Authorization") String sessionToken) {
         try {
             userService.deleteUserByUsernameIfAdmin(username, sessionToken);
             return ResponseEntity.ok(Map.of(

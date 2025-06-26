@@ -16,9 +16,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-//TODO: Note to self its bad to send userID's through requests as this allows a bad actor to modify some one else's data even if they are just using there own session token
-//TODO: to remedy this pare a users session token with there userID  that way the server can look up the all the data it needs with just the session token and no need to send a user id back and throw.
-
 @RestController
 @RequestMapping("/api/todolists")
 public class ToDoListController {
@@ -35,6 +32,12 @@ public class ToDoListController {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Get all to-do lists belonging to the authenticated user.
+     *
+     * @param token Authorization header containing the session token
+     * @return List of ToDoListResponseDTO for the user
+     */
     @GetMapping
     public ResponseEntity<List<ToDoListResponseDTO>> getAllLists(@RequestHeader("Authorization") String token) {
         Long userId = sessionService.validateSession(token);
@@ -47,6 +50,13 @@ public class ToDoListController {
         return ResponseEntity.ok(lists);
     }
 
+    /**
+     * Create a new to-do list for the authenticated user.
+     *
+     * @param token Authorization header containing the session token
+     * @param dto   Request body containing list title
+     * @return The newly created ToDoListResponseDTO
+     */
     @PostMapping
     public ResponseEntity<ToDoListResponseDTO> createList(
             @RequestHeader("Authorization") String token,
@@ -70,6 +80,13 @@ public class ToDoListController {
         return ResponseEntity.ok(ToDoListMapper.toResponseDTO(saved));
     }
 
+    /**
+     * Update an existing to-do list's title. The user must own the list.
+     *
+     * @param token Authorization header containing the session token
+     * @param dto   Request body containing the list ID and new title
+     * @return Updated ToDoListResponseDTO
+     */
     @PutMapping
     public ResponseEntity<ToDoListResponseDTO> updateList(
             @RequestHeader("Authorization") String token,
@@ -91,6 +108,13 @@ public class ToDoListController {
         return ResponseEntity.ok(ToDoListMapper.toResponseDTO(updated));
     }
 
+    /**
+     * Delete a to-do list owned by the authenticated user.
+     *
+     * @param token Authorization header containing the session token
+     * @param id    ID of the list to delete
+     * @return Updated list of remaining ToDoListResponseDTOs for the user
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<List<ToDoListResponseDTO>> deleteList(
             @RequestHeader("Authorization") String token,

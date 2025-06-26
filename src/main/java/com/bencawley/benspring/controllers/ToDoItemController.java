@@ -1,11 +1,13 @@
 package com.bencawley.benspring.controllers;
 
+import com.bencawley.benspring.dtos.ToDoItemRequestDTO;
 import com.bencawley.benspring.dtos.ToDoItemResponseDTO;
 import com.bencawley.benspring.entities.ToDoItemEntity;
 import com.bencawley.benspring.entities.ToDoListEntity;
 import com.bencawley.benspring.repositories.ToDoItemRepository;
-import com.bencawley.benspring.mappers.ToDoItemMapper;
 import com.bencawley.benspring.repositories.ToDoListRepository;
+import com.bencawley.benspring.mappers.ToDoItemMapper;
+import com.bencawley.benspring.services.SessionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,86 +17,177 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/todos")
+@RequestMapping("/api/todolists/{listId}/items")
 public class ToDoItemController {
 
     private final ToDoItemRepository toDoItemRepository;
     private final ToDoListRepository toDoListRepository;
+    private final SessionService sessionService;
 
-    public ToDoItemController(ToDoItemRepository toDoItemRepository, ToDoListRepository toDoListRepository) {
+    public ToDoItemController(ToDoItemRepository toDoItemRepository,
+                              ToDoListRepository toDoListRepository,
+                              SessionService sessionService) {
         this.toDoItemRepository = toDoItemRepository;
         this.toDoListRepository = toDoListRepository;
+        this.sessionService = sessionService;
     }
 
-    // GET all to-do items // todo might need to remove this endpoint call
+    /**
+     * List all items in the specified to-do list.
+     * Requires a valid authorization token.
+     *
+     * @param token   Authorization header with session token
+     * @param listId  ID of the to-do list
+     * @return List of ToDoItemResponseDTO or empty list if unauthorized/not found
+     */
+    // List all items in the specified list
     @GetMapping
-    public ResponseEntity<List<ToDoItemResponseDTO>> getAllToDoItems() {
-        List<ToDoItemResponseDTO> items = toDoItemRepository.findAll()
+    public ResponseEntity<List<ToDoItemResponseDTO>> getAllItemsForList(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long listId
+    ) {
+        Long userId = sessionService.validateSession(token);
+        if (userId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(List.of());
+
+        Optional<ToDoListEntity> listOpt = toDoListRepository.findById(listId);
+        if (listOpt.isEmpty() || !listOpt.get().getUser().getId().equals(userId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
+        }
+
+        List<ToDoItemResponseDTO> items = toDoItemRepository.findByList_Id(listId)
                 .stream()
                 .map(ToDoItemMapper::toResponseDTO)
                 .toList();
+
         return ResponseEntity.ok(items);
     }
 
-    // POST a new to-do item // todo might need to change this to  @PostMapping("/{id}")
-    @PostMapping // todo replace this object with a dto
-    public ResponseEntity<Object> createToDoItem(@RequestBody ToDoItemResponseDTO dto) {
-        Optional<ToDoListEntity> optionalList = toDoListRepository.findById(dto.getItemId());
-        if (optionalList.isEmpty()) {
-            Map<String, String> error = Map.of("error", "ToDoList with ID " + dto.getItemId() + " not found");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    /**
+     * Create a new item in the specified to-do list.
+     *
+     * @param token      Authorization header with session token
+     * @param listId     ID of the to-do list
+     * @param dtoRequest Item data from request
+     * @return Created ToDoItemResponseDTO or error status
+     */
+    // ✅ Create an item in the list
+    @PostMapping
+    public ResponseEntity<ToDoItemResponseDTO> createItem(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long listId,
+            @RequestBody ToDoItemRequestDTO dtoRequest
+    ) {
+        Long userId = sessionService.validateSession(token);
+        if (userId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        Optional<ToDoListEntity> listOpt = toDoListRepository.findById(listId);
+        if (listOpt.isEmpty() || !listOpt.get().getUser().getId().equals(userId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        ToDoListEntity list = optionalList.get();
-        ToDoItemEntity entity = ToDoItemMapper.toEntity(dto, list);
-        ToDoItemEntity saved = toDoItemRepository.save(entity);
+        ToDoItemEntity saved = toDoItemRepository.save(ToDoItemMapper.toEntity(dtoRequest, listOpt.get()));
         return ResponseEntity.ok(ToDoItemMapper.toResponseDTO(saved));
     }
 
-    // GET a single to-do item by ID
-    @GetMapping("/{id}")
-    public ResponseEntity<Object> getToDoItemById(@PathVariable Long id) {
-        //todo: Might have to check that the sessiontoken used in this matches the id if not then deny them access but test first making this change
-        Optional<ToDoItemEntity> optionalItem = toDoItemRepository.findById(id);
-        if (optionalItem.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "ToDoItem with ID " + id + " not found"));
+    /**
+     * Get a single item by ID from the specified to-do list.
+     *
+     * @param token  Authorization header with session token
+     * @param listId ID of the to-do list
+     * @param itemId ID of the to-do item
+     * @return ToDoItemResponseDTO or error status
+     */
+    // ✅ Get a single item
+    @GetMapping("/{itemId}")
+    public ResponseEntity<ToDoItemResponseDTO> getItem(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long listId,
+            @PathVariable Long itemId
+    ) {
+        Long userId = sessionService.validateSession(token);
+        if (userId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        Optional<ToDoListEntity> listOpt = toDoListRepository.findById(listId);
+        if (listOpt.isEmpty() || !listOpt.get().getUser().getId().equals(userId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        return ResponseEntity.ok(ToDoItemMapper.toResponseDTO(optionalItem.get()));
+        Optional<ToDoItemEntity> itemOpt = toDoItemRepository.findById(itemId);
+        if (itemOpt.isEmpty() || !itemOpt.get().getList().getId().equals(listId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        return ResponseEntity.ok(ToDoItemMapper.toResponseDTO(itemOpt.get()));
     }
 
-    // DELETE a to-do item by ID
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteToDoItem(@PathVariable Long id) {
-        Optional<ToDoItemEntity> optionalItem = toDoItemRepository.findById(id);
-        if (optionalItem.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "ToDoItem with ID " + id + " not found"));
+    /**
+     * Update an existing item in the specified to-do list.
+     *
+     * @param token  Authorization header with session token
+     * @param listId ID of the to-do list
+     * @param itemId ID of the to-do item
+     * @param dto    Item data to update
+     * @return Updated ToDoItemResponseDTO or error status
+     */
+    // ✅ Update an item
+    @PutMapping("/{itemId}")
+    public ResponseEntity<ToDoItemResponseDTO> updateItem(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long listId,
+            @PathVariable Long itemId,
+            @RequestBody ToDoItemRequestDTO dto
+    ) {
+        Long userId = sessionService.validateSession(token);
+        if (userId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        Optional<ToDoListEntity> listOpt = toDoListRepository.findById(listId);
+        if (listOpt.isEmpty() || !listOpt.get().getUser().getId().equals(userId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        toDoItemRepository.deleteById(id);
-        return ResponseEntity.ok(Map.of("message", "ToDoItem deleted successfully"));
-    }
-
-    // PUT update a to-do item
-    @PutMapping("/{id}")
-    public ResponseEntity<Object> updateToDoItem(@PathVariable Long id, @RequestBody ToDoItemResponseDTO dto) {
-        Optional<ToDoItemEntity> optionalItem = toDoItemRepository.findById(id);
-        if (optionalItem.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "ToDoItem with ID " + id + " not found"));
+        Optional<ToDoItemEntity> itemOpt = toDoItemRepository.findById(itemId);
+        if (itemOpt.isEmpty() || !itemOpt.get().getList().getId().equals(listId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        Optional<ToDoListEntity> optionalList = toDoListRepository.findById(dto.getItemId());
-        if (optionalList.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", "ToDoList with ID " + dto.getItemId() + " not found"));
-        }
+        ToDoItemEntity entity = itemOpt.get();
+        entity.setTitle(dto.getTitle());
+        entity.setCompleted(dto.isCompleted());
+        entity.setDueDate(dto.getDueDate());
 
-        ToDoItemEntity entity = ToDoItemMapper.toEntity(dto, optionalList.get());
-        entity.setId(id); // Preserve the existing ID
         ToDoItemEntity updated = toDoItemRepository.save(entity);
         return ResponseEntity.ok(ToDoItemMapper.toResponseDTO(updated));
+    }
+
+    /**
+     * Delete an item by ID from the specified to-do list.
+     *
+     * @param token  Authorization header with session token
+     * @param listId ID of the to-do list
+     * @param itemId ID of the to-do item
+     * @return Success message or error status
+     */
+    // ✅ Delete an item
+    @DeleteMapping("/{itemId}")
+    public ResponseEntity<Object> deleteItem(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long listId,
+            @PathVariable Long itemId
+    ) {
+        Long userId = sessionService.validateSession(token);
+        if (userId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message","Unauthorized"));
+
+        Optional<ToDoListEntity> listOpt = toDoListRepository.findById(listId);
+        if (listOpt.isEmpty() || !listOpt.get().getUser().getId().equals(userId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message","List not found"));
+        }
+
+        Optional<ToDoItemEntity> itemOpt = toDoItemRepository.findById(itemId);
+        if (itemOpt.isEmpty() || !itemOpt.get().getList().getId().equals(listId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message","Item not found"));
+        }
+
+        toDoItemRepository.delete(itemOpt.get());
+        return ResponseEntity.ok(Map.of("message","Item deleted successfully"));
     }
 }

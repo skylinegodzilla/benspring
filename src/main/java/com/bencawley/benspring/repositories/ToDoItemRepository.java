@@ -8,4 +8,6 @@ import java.util.List;
 @Repository
 public interface ToDoItemRepository extends JpaRepository<ToDoItemEntity, Long> {
     List<ToDoItemEntity> findByList_Id(Long listId);
+    // this is basicley saying SELECT * FROM todo_item WHERE list_id = ?
 }
+
