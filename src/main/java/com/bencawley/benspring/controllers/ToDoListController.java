@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+//TODO: Note to self its bad to send userID's through requests as this allows a bad actor to modify some one else's data even if they are just using there own session token
+//TODO: to remedy this pare a users session token with there userID  that way the server can look up the all the data it needs with just the session token and no need to send a user id back and throw.
+
 @RestController
 @RequestMapping("/api/todolists")
 public class ToDoListController {
@@ -45,8 +48,10 @@ public class ToDoListController {
     }
 
     @PostMapping
-    public ResponseEntity<ToDoListResponseDTO> createList(@RequestHeader("Authorization") String token,
-                                                  @RequestBody ToDoListRequestDTO dto) {
+    public ResponseEntity<ToDoListResponseDTO> createList(
+            @RequestHeader("Authorization") String token,
+            @RequestBody ToDoListRequestDTO dto
+    ) {
         // session check
         Long userId = sessionService.validateSession(token);
         if (userId == null || !userId.equals(dto.getUserId())) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -66,16 +71,18 @@ public class ToDoListController {
     }
 
     @PutMapping
-    public ResponseEntity<ToDoListResponseDTO> updateList(@RequestHeader("Authorization") String token,
-                                                  @RequestBody ToDoListRequestDTO dto) {
+    public ResponseEntity<ToDoListResponseDTO> updateList(
+            @RequestHeader("Authorization") String token,
+            @RequestBody ToDoListRequestDTO dto
+    ) {
         Long userId = sessionService.validateSession(token);
         if (userId == null || !userId.equals(dto.getUserId())) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
-        Optional<ToDoListEntity> opt = listRepo.findById(dto.getUserId());
+        Optional<ToDoListEntity> opt = listRepo.findById(dto.getListId());
         if (opt.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 
         ToDoListEntity entity = opt.get();
-        if (!entity.getUser().getId().equals(userId)) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        if (!entity.getUser().getId().equals(userId)) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // checking to see if the entity (the list) users id is the same as the actual user id to authorise if they can edit it
 
         entity.setTitle(dto.getTitle());
         // You can also add item update logic here
@@ -85,8 +92,10 @@ public class ToDoListController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<List<ToDoListResponseDTO>> deleteList(@RequestHeader("Authorization") String token,
-                                                        @PathVariable Long id) {
+    public ResponseEntity<List<ToDoListResponseDTO>> deleteList(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long id
+    ) {
         Long userId = sessionService.validateSession(token);
         if (userId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
