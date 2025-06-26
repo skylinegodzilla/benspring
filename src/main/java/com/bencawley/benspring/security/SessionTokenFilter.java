@@ -29,7 +29,8 @@ public class SessionTokenFilter extends OncePerRequestFilter {
         String token = request.getHeader("Authorization");
         if (token == null || sessionService.validateSession(token) == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Invalid or missing session token");
+            response.getWriter().write("Invalid or missing session token"); // the message that gets returned as the result
+            System.out.println("Attempt to access resource with out a valid session token:"); // writing to the logs
             return; // block request if invalid token
         }
 
