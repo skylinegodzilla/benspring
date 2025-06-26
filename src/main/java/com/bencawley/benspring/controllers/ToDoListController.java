@@ -54,7 +54,7 @@ public class ToDoListController {
     ) {
         // session check
         Long userId = sessionService.validateSession(token);
-        if (userId == null || !userId.equals(dto.getUserId())) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        if (userId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
         // fetch user from database
         UserEntity user = userRepository.findById(userId).orElse(null);
@@ -76,7 +76,7 @@ public class ToDoListController {
             @RequestBody ToDoListRequestDTO dto
     ) {
         Long userId = sessionService.validateSession(token);
-        if (userId == null || !userId.equals(dto.getUserId())) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        if (userId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
         Optional<ToDoListEntity> opt = listRepo.findById(dto.getListId());
         if (opt.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

@@ -81,19 +81,21 @@
 ## 🚡 REST API Endpoints
 
 ### Authentication (`/api/auth`)
-| Method | Path        | Body                                | Response                              |
-|:------:|-------------|-------------------------------------|---------------------------------------|
-| POST   | `/register` | `{ "username", "email", "password" }` | `{ "token", "userId", … }`           |
-| POST   | `/login`    | `{ "username", "password" }`        | `{ "token", "userId", … }`            |
-| PUT    | `/logout`   | *(header)* `Authorization: <token>` | `{ "success": true, "message": … }`   |
+| Method | Path        | Body                                | Response                |
+|:------:|-------------|-------------------------------------|-------------------------|
+| POST   | `/register` | `{ "username", "email", "password" }` | `{ "token", … }`        |
+| POST   | `/login`    | `{ "username", "password" }`        | `{ "token", … }`        |
+| PUT    | `/logout`   | *(header)* `Authorization: <token>` | `{ "success": true, "message": … }` |
+The backend resolves the authenticated user exclusively via the session token now so.
+You no longer need to (or should) send the userId in request bodies or query parameters.
 
 ### To-Do Lists (`/api/todolists`)
 > **All require** `Authorization: <token>` header.  
 | Method | Path                         | Body                                              | Response                             |
 |:------:|------------------------------|---------------------------------------------------|--------------------------------------|
 | GET    | `/api/todolists`             | *none*                                            | `List<ToDoListResponseDTO>`          |
-| POST   | `/api/todolists`             | `ToDoListRequestDTO {title, description, userId}` | `ToDoListResponseDTO`                |
-| PUT    | `/api/todolists/{listId}`    | `ToDoListRequestDTO {title, description, userId}` | `ToDoListResponseDTO`                |
+| POST   | `/api/todolists`             | `ToDoListRequestDTO {title, description}` | `ToDoListResponseDTO`                |
+| PUT    | `/api/todolists/{listId}`    | `ToDoListRequestDTO {title, description}` | `ToDoListResponseDTO`                |
 | DELETE | `/api/todolists/{listId}`    | *none*                                            | `List<ToDoListResponseDTO>`          |
 
 ### To-Do Items

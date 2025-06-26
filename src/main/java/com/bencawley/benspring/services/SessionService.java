@@ -17,14 +17,11 @@ public class SessionService {
     // Create a new session for a user
     public void createSession(Long userId, String token) {
         sessions.put(token, userId);
-        System.out.println("Created valid session for:" + userId); //todo remove this line
+        System.out.println("Created valid session for User:" + userId);
     }
 
     // Validate a session token and return the associated userId if valid, else null
     public Long validateSession(String token) {
-        System.out.println("Validating session token:" + token); //todo remove this line
-        System.out.println("UserID for the token is:" + sessions.get(token)); //todo remove this line
-        System.out.println("All sessions:" + sessions); //todo remove this line
         return sessions.get(token);
     }
 
@@ -32,7 +29,4 @@ public class SessionService {
     public void invalidateSession(String token) {
         sessions.remove(token);
     }
-
-    // todo add this
-    //UserEntity getUserBySession(String token); // Optional, helpful for cleaner controller code
 }
