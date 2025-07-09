@@ -15,6 +15,9 @@ public class ToDoItemEntity {
 
     private String title;
 
+    @Column(name = "description", length = 1000) // not needed but is a nice to have to customise the table column
+    private String description;
+
     private Boolean completed = false;
 
     @Column(name = "due_date")
@@ -31,6 +34,9 @@ public class ToDoItemEntity {
 
     public String getTitle() {return title;}
     public void setTitle(String title) {this.title = title;}
+
+    public String getDescription() {return description;}
+    public void setDescription(String description) {this.description = description;}
 
     public Boolean isCompleted() {return completed;}
     public void setCompleted(Boolean completed) {this.completed = completed;}

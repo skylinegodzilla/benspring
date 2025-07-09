@@ -11,6 +11,7 @@ public class ToDoItemMapper {
         ToDoItemResponseDTO dto = new ToDoItemResponseDTO();
         dto.setItemId(entity.getId());
         dto.setTitle(entity.getTitle());
+        dto.setDescription(entity.getDescription());
         dto.setCompleted(entity.isCompleted());
         dto.setDueDate(entity.getDueDate());
         return dto;
@@ -20,6 +21,7 @@ public class ToDoItemMapper {
     public static ToDoItemEntity toEntity(ToDoItemRequestDTO dto, ToDoListEntity list) {
         ToDoItemEntity entity = new ToDoItemEntity();
         entity.setTitle(dto.getTitle());
+        entity.setDescription(dto.getDescription());
         entity.setCompleted(dto.isCompleted());
         entity.setDueDate(dto.getDueDate());
         entity.setList(list);

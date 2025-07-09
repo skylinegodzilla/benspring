@@ -7,6 +7,7 @@ import java.time.LocalDate;
 public class ToDoItemResponseDTO {
     private Long itemId;
     private String title;
+    private String description;
     private boolean completed;
     private LocalDate dueDate;
 
@@ -15,7 +16,10 @@ public class ToDoItemResponseDTO {
     public void setItemId(Long itemId) {this.itemId = itemId;}
 
     public String getTitle() {return title;}
-    public void setTitle(String name) {this.title = title;}
+    public void setTitle(String name) {this.title = name;}
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description;}
 
     public boolean isCompleted() {return completed;}
     public void setCompleted(boolean completed) {this.completed = completed;}
