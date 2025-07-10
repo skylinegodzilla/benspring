@@ -5,6 +5,26 @@ import jakarta.persistence.*;
 
 import java.time.LocalDate;
 
+/*
+    So an entity is basicley an object that can be saved into a database.
+
+    Imagination a Table as an Object Type
+    and a Row as an Instance of that Type.
+    An Entity would then be the Class of the Object.
+
+    So here we are defining the Table like it is an Object Type
+    with each coulomb being a member value
+    and each row being an instance.
+
+    However, keep in mind this is just a metaphor.
+    For example, you have to crate the entity and populate it,
+    but then you also need to SAVE it to the database before it can become a row.
+    Unlike an actual object witch is automatically instantiated as soon as you create it.
+
+    And no pointers are not part of this metaphor.
+
+*/
+
 @Entity
 @Table(name = "todo_items")
 public class ToDoItemEntity {
@@ -22,6 +42,9 @@ public class ToDoItemEntity {
 
     @Column(name = "due_date")
     private LocalDate dueDate;
+
+    @Column(name = "position")
+    private Integer position;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "list_id")
@@ -43,6 +66,9 @@ public class ToDoItemEntity {
 
     public LocalDate getDueDate() {return dueDate;}
     public void setDueDate(LocalDate dueDate) {this.dueDate = dueDate;}
+
+    public Integer getPosition() {return position;}
+    public void setPosition(Integer position) {this.position = position;}
 
     public ToDoListEntity getList() {return list;}
     public void setList(ToDoListEntity list) {this.list = list;}

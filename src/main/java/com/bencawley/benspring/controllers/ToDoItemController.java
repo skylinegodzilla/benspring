@@ -54,7 +54,7 @@ public class ToDoItemController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
         }
 
-        List<ToDoItemResponseDTO> items = toDoItemRepository.findByList_Id(listId)
+        List<ToDoItemResponseDTO> items = toDoItemRepository.findByList_IdOrderByPosition(listId)
                 .stream()
                 .map(ToDoItemMapper::toResponseDTO)
                 .toList();
@@ -85,7 +85,21 @@ public class ToDoItemController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        ToDoItemEntity saved = toDoItemRepository.save(ToDoItemMapper.toEntity(dtoRequest, listOpt.get()));
+        /*
+            TODO: think about making a service for ToDoItem and ToDoList
+            A controller should mostly just be an entry point for API calls and a tool to build and return a response.
+            All the calculations needed to build said response should be abstracted away in to services.
+            This already has that for session services but not for the ToDoItem like this logic below where we calculate what
+            the  max position value for a list for a new item being created. It is ok for now because this is not much
+            logic but its still good practices so that these controllers do not become bloated.
+        */
+        // Get the next position for the new item in this list
+        int maxPosition = toDoItemRepository.findMaxPositionByListId(listId).orElse(0);
+        ToDoItemEntity newItem = ToDoItemMapper.toEntity(dtoRequest, listOpt.get());
+        newItem.setPosition(maxPosition + 1);
+
+        // Save and return response
+        ToDoItemEntity saved = toDoItemRepository.save(newItem);
         return ResponseEntity.ok(ToDoItemMapper.toResponseDTO(saved));
     }
 
@@ -190,4 +204,50 @@ public class ToDoItemController {
         toDoItemRepository.delete(itemOpt.get());
         return ResponseEntity.ok(Map.of("message","Item deleted successfully"));
     }
+
+    /**
+     * Reorder the items in a specific to-do list by their new order of IDs.
+     *
+     * @param token          Authorization header with session token
+     * @param listId         ID of the to-do list
+     * @param orderedItemIds List of item IDs in the new order
+     * @return 200 OK if reorder is successful, or an error status
+     */
+// ✅ Reorder items within the list
+    @PutMapping("/reorder")
+    public ResponseEntity<Void> reorderItems(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long listId,
+            @RequestBody List<Long> orderedItemIds
+    ) {
+        Long userId = sessionService.validateSession(token);
+        if (userId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        Optional<ToDoListEntity> listOpt = toDoListRepository.findById(listId);
+        if (listOpt.isEmpty() || !listOpt.get().getUser().getId().equals(userId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+    /*
+        TODO: Refactor this into a ToDoItemService if the logic expands.
+        This loop does simple position updating but will grow more complex
+        once reordering rules or validation expand.
+    */
+        for (int i = 0; i < orderedItemIds.size(); i++) {
+            Long itemId = orderedItemIds.get(i);
+
+            ToDoItemEntity item = toDoItemRepository.findById(itemId)
+                    .orElseThrow(() -> new RuntimeException("Item not found: " + itemId));
+
+            if (!item.getList().getId().equals(listId)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
+
+            item.setPosition(i);
+            toDoItemRepository.save(item);
+        }
+
+        return ResponseEntity.ok().build();
+    }
+
 }

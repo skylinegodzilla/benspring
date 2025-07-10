@@ -8,6 +8,7 @@ public class ToDoItemRequestDTO {
     private boolean completed;
     private Long listId;
     private LocalDate dueDate;
+    private Integer position;
 
     // Getters and Setters
     public String getTitle() {return title;}
@@ -24,4 +25,7 @@ public class ToDoItemRequestDTO {
 
     public LocalDate getDueDate() {return dueDate;}
     public void setDueDate(LocalDate dueDate) {this.dueDate = dueDate;}
+
+    public Integer getPosition() {return position;}
+    public void setPosition(Integer position) {this.position = position;}
 }
