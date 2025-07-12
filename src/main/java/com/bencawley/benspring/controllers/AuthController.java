@@ -130,29 +130,4 @@ public class AuthController {
         response.setMessage("Logged out successfully.");
         return ResponseEntity.ok(response);
     }
-
-    /**
-     * Deletes a user account by username, only if the requester is an admin.
-     *
-     * @param username Username of the user to delete
-     * @param sessionToken Admin's session token from Authorization header
-     * @return Success or failure message
-     */
-    @DeleteMapping("/remove/{username}")
-    public ResponseEntity<?> deleteUser( // todo fix this response entity to return a real object
-                                         @PathVariable String username,
-                                         @RequestHeader("Authorization") String sessionToken) {
-        try {
-            userService.deleteUserByUsernameIfAdmin(username, sessionToken);
-            return ResponseEntity.ok(Map.of(
-                    "status", 200,
-                    "message", "User deleted successfully"
-            ));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
-                    "status", 403,
-                    "message", e.getMessage()
-            ));
-        }
-    }
 }
