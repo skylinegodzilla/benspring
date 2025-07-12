@@ -14,6 +14,7 @@ public class ToDoListMapper {
         dto.setTitle(entity.getTitle());
         dto.setDescription(entity.getDescription());
 
+        // TODO: This is a part I still dont fully understand I just know it works :P
         List<ToDoItemResponseDTO> itemDTOs = entity.getItems()
                 .stream()
                 .map(ToDoItemMapper::toResponseDTO)
@@ -23,6 +24,13 @@ public class ToDoListMapper {
         return dto;
     }
 
+    /*
+        This is for creating a list so we only need the title and description.
+        The database will automatically create the ID
+        and the items hold a reference to what list they belong to
+        TODO: I still dont know how it creates the user_id reference I know it has it i just cant remember how it makes it
+        ohh so in the controller we say entity.setUser(user); after we call this mapper to set the user ID
+    */
     public static ToDoListEntity toEntity(ToDoListRequestDTO dto) {
         ToDoListEntity entity = new ToDoListEntity();
         entity.setTitle(dto.getTitle());
