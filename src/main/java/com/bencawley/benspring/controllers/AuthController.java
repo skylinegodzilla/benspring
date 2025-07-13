@@ -2,6 +2,7 @@ package com.bencawley.benspring.controllers;
 
 import com.bencawley.benspring.dtos.*;
 import com.bencawley.benspring.entities.UserEntity;
+import com.bencawley.benspring.mappers.MeMapper;
 import com.bencawley.benspring.services.SessionService;
 import com.bencawley.benspring.services.UserService;
 import org.springframework.http.HttpStatus;
@@ -9,8 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -129,5 +128,21 @@ public class AuthController {
         response.setSuccess(true);
         response.setMessage("Logged out successfully.");
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/users/me")
+    public ResponseEntity<MeDTO> getCurrentUser(@RequestHeader("Authorization") String token) {
+
+        // this is just being extra safe its probably not even needed but since Auth endpoints are not filtered i thought it will be better safe then sorry
+        Long userId = sessionService.validateSession(token);
+        if (userId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        // fetch the user entity from the database
+        UserEntity user = userService.findBySessionToken(token);
+
+        // convert it into a dto to send back all the user data to this endpoint
+        MeDTO dto = MeMapper.toResponseDTO(user);
+
+        return ResponseEntity.ok(dto);
     }
 }
