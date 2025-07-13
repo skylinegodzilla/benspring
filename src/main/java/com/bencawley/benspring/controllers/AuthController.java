@@ -2,7 +2,6 @@ package com.bencawley.benspring.controllers;
 
 import com.bencawley.benspring.dtos.*;
 import com.bencawley.benspring.entities.UserEntity;
-import com.bencawley.benspring.mappers.MeMapper;
 import com.bencawley.benspring.services.SessionService;
 import com.bencawley.benspring.services.UserService;
 import org.springframework.http.HttpStatus;
@@ -10,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -17,6 +18,8 @@ public class AuthController {
 
     private final UserService userService;
     private final SessionService sessionService;
+
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
     public AuthController(UserService userService,
                           PasswordEncoder passwordEncoder,
@@ -65,7 +68,8 @@ public class AuthController {
                         new UserLoginResponseDTO(null,
                                 null,
                                 HttpStatus.UNAUTHORIZED.value(),
-                                "Invalid credentials"
+                                "Invalid credentials",
+                                null
                         )
                 );
             }
@@ -76,7 +80,9 @@ public class AuthController {
                     user.getSessionToken(),
                     user.getId(),
                     HttpStatus.OK.value(),
-                    "Login successful"
+                    "Login successful",
+                    user.getRole()
+
             );
 
             return ResponseEntity.ok(response);
@@ -87,7 +93,8 @@ public class AuthController {
                             null,
                             null,
                             ex.getStatusCode().value(),
-                            ex.getReason()
+                            ex.getReason(),
+                            null
                     )
             );
         }
@@ -128,21 +135,5 @@ public class AuthController {
         response.setSuccess(true);
         response.setMessage("Logged out successfully.");
         return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/users/me")
-    public ResponseEntity<MeDTO> getCurrentUser(@RequestHeader("Authorization") String token) {
-
-        // this is just being extra safe its probably not even needed but since Auth endpoints are not filtered i thought it will be better safe then sorry
-        Long userId = sessionService.validateSession(token);
-        if (userId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-
-        // fetch the user entity from the database
-        UserEntity user = userService.findBySessionToken(token);
-
-        // convert it into a dto to send back all the user data to this endpoint
-        MeDTO dto = MeMapper.toResponseDTO(user);
-
-        return ResponseEntity.ok(dto);
     }
 }
