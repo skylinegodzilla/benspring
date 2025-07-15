@@ -56,7 +56,7 @@ public class AuthController {
      * Logs in a user with provided credentials and returns a session token.
      *
      * @param dto User login credentials
-     * @return Session token and user ID, or unauthorized status
+     * @return Session token and user role, or unauthorized status
      */
     @PostMapping("/login")
     public ResponseEntity<UserLoginResponseDTO> login(@RequestBody UserLoginDTO dto) {
@@ -64,39 +64,33 @@ public class AuthController {
             UserEntity user = userService.login(dto);
 
             if (user == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                        new UserLoginResponseDTO(null,
-                                null,
-                                HttpStatus.UNAUTHORIZED.value(),
-                                "Invalid credentials",
-                                null
-                        )
-                );
+                UserLoginResponseDTO errorResponse = new UserLoginResponseDTO();
+                errorResponse.setToken(null);
+                errorResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
+                errorResponse.setMessage("Invalid credentials");
+                errorResponse.setRole(null);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
             }
 
             sessionService.createSession(user.getId(), user.getSessionToken());
 
-            UserLoginResponseDTO response = new UserLoginResponseDTO(
-                    user.getSessionToken(),
-                    user.getId(),
-                    HttpStatus.OK.value(),
-                    "Login successful",
-                    user.getRole()
+            UserLoginResponseDTO response = new UserLoginResponseDTO();
+            response.setToken(user.getSessionToken());
+            response.setStatus(HttpStatus.OK.value());
+            response.setMessage("Login successful");
+            response.setRole(user.getRole());
 
-            );
+            log.info("Response for user role: {}", user.getRole()); // TODO: debugging remove when done
 
             return ResponseEntity.ok(response);
 
         } catch (ResponseStatusException ex) {
-            return ResponseEntity.status(ex.getStatusCode()).body(
-                    new UserLoginResponseDTO(
-                            null,
-                            null,
-                            ex.getStatusCode().value(),
-                            ex.getReason(),
-                            null
-                    )
-            );
+            UserLoginResponseDTO errorResponse = new UserLoginResponseDTO();
+            errorResponse.setToken(null);
+            errorResponse.setStatus(ex.getStatusCode().value());
+            errorResponse.setMessage(ex.getReason());
+            errorResponse.setRole(null);
+            return ResponseEntity.status(ex.getStatusCode()).body(errorResponse);
         }
     }
 
