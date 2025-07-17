@@ -74,7 +74,10 @@ Many strings (like “Login failed”) are hardcoded throughout components.
 
 ### 13. No Unit or Integration Tests Yet
 No test coverage exists for backend or frontend.
-- 🔧 **Planned Fix:** Add full coverage once core features are implemented.
+- 🔧 **Planned Fix:** Add full coverage once core features are implemented. 
+- It was allways planed to add the tests from the beginning, but I needed to conform that it all worked before "locking in the logic" with tests.
+- This is why we first needed to create the front end to check that the endpoints did what they need to do. (postman can only test so much)
+- And is why I created frontend before creating mobile.
 
 ---
 
