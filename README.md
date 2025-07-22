@@ -29,8 +29,11 @@
     - ARP/Nmap on local network
 - **Notifications**
     - Local push when user is home and tasks are due
+- **Backend tests**
+    - Backend now finally is fully unit tested
 
 ---
+*
 
 ## 🗄️ Database Schema
 
