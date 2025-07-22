@@ -14,7 +14,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-class ToDoListRepositoryTest {
+class ToDoListRepositoryTests {
 
     @Autowired
     private UserRepository userRepo;
