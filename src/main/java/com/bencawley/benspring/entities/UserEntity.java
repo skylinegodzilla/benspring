@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +21,8 @@ JPA handles:
 
 @Entity // marks a class as a JPA entity — meaning it's a class that maps to a table in your database. in this case the class is User
 public class UserEntity {
+
+    private static final Logger log = LoggerFactory.getLogger(UserEntity.class);
 
     // ID
     @Id // this makes this class member the primary key of the entity. Each user will have its own uniqe id
@@ -72,9 +76,7 @@ public class UserEntity {
     }
 
     //Username
-    public String getUsername() {
-        return username;
-    }
+    public String getUsername() {return username;}
     public void setUsername(String username) {
         this.username = username;
     }
@@ -96,7 +98,10 @@ public class UserEntity {
     }
 
     // User Role
-    public UserRole getRole() {return role;}
+    public UserRole getRole() {
+        log.info("User Role: {}", role); // TODO: debug please remove
+        return role;
+    }
     public void setRole(UserRole role) {this.role = role;}
 
     // List linking

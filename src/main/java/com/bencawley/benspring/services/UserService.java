@@ -1,6 +1,7 @@
 package com.bencawley.benspring.services;
 
 
+import com.bencawley.benspring.dtos.AdminUserDTO;
 import com.bencawley.benspring.dtos.UserLoginDTO;
 import com.bencawley.benspring.dtos.UserRegistrationDTO;
 import com.bencawley.benspring.entities.UserEntity;
@@ -13,18 +14,16 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.security.SecureRandom;
 import java.math.BigInteger;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
 
-    // Injected dependency's
     private final UserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
-
-    // Other Members
     private final SecureRandom random = new SecureRandom();
 
-    // UserService constructor
     public UserService(UserRepository userRepo, PasswordEncoder passwordEncoder) {
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
@@ -32,7 +31,6 @@ public class UserService {
 
     // Register
     public UserEntity register(UserRegistrationDTO dto) {
-        // Check for if email or username exists already
         if (userRepo.existsByUsername(dto.getUsername()) || userRepo.existsByEmail(dto.getEmail())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "User already exists with this username or email");
         }
@@ -40,49 +38,29 @@ public class UserService {
         UserEntity user = new UserEntity();
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
-        user.setPasswordHash(passwordEncoder.encode(dto.getPassword())); // We encode the password as soon as we get it from the json/dto
+        user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         user.setSessionToken(generateSessionToken());
-        //todo generate user role
+        user.setRole(UserRole.USER); // <- Now initialized properly
         return userRepo.save(user);
     }
 
     // Login
     public UserEntity login(UserLoginDTO dto) {
         UserEntity user = userRepo.findByUsername(dto.getUsername());
-
-        if (user != null && passwordEncoder.matches(dto.getPassword(), user.getPasswordHash())) { // encode the user password and see if it matches the hash in the database
+        if (user != null && passwordEncoder.matches(dto.getPassword(), user.getPasswordHash())) {
             user.setSessionToken(generateSessionToken());
             return userRepo.save(user);
         }
-
         return null;
     }
 
-    // Delete Account (If Admin)
-    public void deleteUserByUsernameIfAdmin(String usernameToDelete, String callerSessionToken) {
-        UserEntity caller = userRepo.findBySessionToken(callerSessionToken);
-        if (caller == null) {
-            throw new RuntimeException("Invalid session token");
-        }
-
-        if (caller.getRole() != UserRole.ADMIN) {
-            throw new RuntimeException("Only admins can delete users");
-        }
-
-        UserEntity targetUser = userRepo.findByUsername(usernameToDelete);
-        if (targetUser == null) {
-            throw new RuntimeException("User to delete not found");
-        }
-
-        userRepo.delete(targetUser);
-    }
-
+    // Core user operations
     public UserEntity findBySessionToken(String token) {
         return userRepo.findBySessionToken(token);
     }
 
     public UserEntity findBySessionTokenOrThrow(String token) {
-        UserEntity user = findBySessionToken(token); // reuse existing method
+        UserEntity user = findBySessionToken(token);
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid session token");
         }
@@ -93,12 +71,47 @@ public class UserService {
         return userRepo.findByUsername(username);
     }
 
+    public UserEntity findByUsernameOrThrow(String username) {
+        UserEntity user = userRepo.findByUsername(username);
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+        return user;
+    }
+
     public UserEntity getUserById(Long id) {
         return userRepo.findById(id).orElse(null);
     }
 
     public UserEntity save(UserEntity user) {
         return userRepo.save(user);
+    }
+
+    /**
+     * For admin use only – callers must check admin permissions.
+     * Use only from AdminService.
+     */
+    public void delete(UserEntity user) {
+        userRepo.delete(user);
+    }
+
+    /**
+     * For admin use only – callers must check admin permissions.
+     * Use only from AdminService.
+     */
+    public List<AdminUserDTO> getAllUsers() {
+        return userRepo.findAll()
+                .stream()
+                .map(user -> new AdminUserDTO(
+                        user.getUsername(),
+                        user.getEmail(),
+                        user.getRole()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    public String encodePassword(String rawPassword) {
+        return passwordEncoder.encode(rawPassword);
     }
 
     private String generateSessionToken() {
