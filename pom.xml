@@ -84,11 +84,11 @@
 			<version>4.0.2</version>
 		</dependency>
 
-		<!-- ✅ H2 in-memory DB for test context -->
+		<!-- ✅ H2 in-memory DB for Dev Runtime context and Tests -->
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<scope>test</scope>
+			<scope>runtime</scope>
 		</dependency>
 
 		<!-- ✅ AssertJ for `assertThat()` -->
