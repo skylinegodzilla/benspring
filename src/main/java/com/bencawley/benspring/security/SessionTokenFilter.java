@@ -72,6 +72,11 @@ public class SessionTokenFilter extends OncePerRequestFilter {
              return true;
         }
 
+        // 6) H2 console
+        if (path.startsWith("/h2-console")){
+            return true;
+        }
+
         // everything else *will* be filtered
         return false;
     }
